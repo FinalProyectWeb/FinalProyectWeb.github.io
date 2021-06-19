@@ -54,7 +54,7 @@
     async usuarioAuth => {
         if(usuarioAuth && usuarioAuth.email){
             //Usuario aceptado
-            usuario = usuarioAuth.email;
+            usuario = usuarioAuth.displayName;
 
             muestraMensajes();
         }else{

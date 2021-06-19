@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProyectoFinalWeb</title>
+
+    <!--Nucleo de Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    
+    <!--Servicio de Autenticación-->
+     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+
+    <script src="js/init.js"></script>
+  </head>
+  <body>
+      <h1>Autenticación</h1>
+      <h1>Sesión</h1>
+      <fieldset>
+          <legend>Email</legend>
+          <output id="email"><progress max="100">Cargando...</progress>></output>
+      </fieldset>
+      <fieldset>
+          <legend>Nombre</legend>
+          <output id="nombre"></output>
+      </fieldset>
+      <figure><img id="avatar" alt="Avatar"></figure>
+      <button type="button" onclick="terminaSesión()">Cerrar Sesión</button>
+
+<script>
+    //@ts-check
+    //Conexion al sistema de Autentificación de Firebase
+    //@ts-ignore
+    const auth = firebase.auth();
+
+    /** Tipo de autenticación de usuarios. En este caso es Google*/
+    //@ts-ignore
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    /* Configuramos el proveedor de Google para que nos permita
+    seleccionar de una lista*/
+    provider.setCustomParameters({ prompt: "select_account"});
+    /* Recibe una función que se invoca cada que hay un cambio en la
+    autenticación y recibe el modelo con las caracteristicas del usuario*/
+
+    auth.onAuthStateChanged(
+    /* Recibimos las caracteristicas del usuario o null si no ha iniciado
+    sesión*/
+    usuarioAuth => {
+        if(usuarioAuth && usuarioAuth.email){
+            //Usuario aceptado
+            email.value = usuarioAuth.email;
+
+            nombre.value = usuarioAuth.displayName;
+
+            avatar.src = usuarioAuth.photoUrl;
+        }else{
+            auth.signInWithRedirect(provider);
+        }
+    },
+        procesaError
+    );
+
+    /* Termina Sesión */
+    async function terminaSesión() {
+        try {
+            await auth.signOut();
+        } catch (e) {
+            procesaError(e);
+        }
+    }
+
+    /* Procesa un error. Muestra el objeto en la consola y un cuadro de alerta
+    con el mensaje. 
+    @param {Error} e descripcion del error */    
+    function procesaError(e){
+        console.log(e);
+        alert(e.message);
+    }
+</script>
+  </body>
+</html>

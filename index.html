@@ -25,7 +25,6 @@
           <legend>Nombre</legend>
           <output id="nombre"></output>
       </fieldset>
-      <figure><img id="avatar" alt="Avatar"></figure>
       <button type="button" onclick="terminaSesión()">Cerrar Sesión</button>
 
 <script>
@@ -53,8 +52,6 @@
             email.value = usuarioAuth.email;
 
             nombre.value = usuarioAuth.displayName;
-
-            avatar.src = usuarioAuth.photoUrl;
         }else{
             auth.signInWithRedirect(provider);
         }

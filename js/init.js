@@ -1,5 +1,5 @@
-/**Conectamos nuestra aplicación web con
- * Firebase con las siguientes lineas de código*/
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 firebase.initializeApp({
     apiKey: "AIzaSyCEFLvYOrCyy419tkEnmT_-8Gy3QPtJMeQ",
     authDomain: "final-proyect-programation-web.firebaseapp.com",

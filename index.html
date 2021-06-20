@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProyectoFinalWeb</title>
 
-    <!--Referencia de nuestra hoja de estilos-->
-    <link rel="stylesheet" href="CSS/estilos.css">
-
+    
+    
     <!--Nucleo de Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     
@@ -17,103 +16,137 @@
 
      <!--Servicio de Firestore "Base de Datos"-->
      <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
-    
-     <!--Vinculamos nuestra hoja de -->
-    <script src="Javascript/init.js"></script>
-</head>
-<body>
-    <!--Menu lateral de hipervinculos-->    
-    <form name="forma">
 
-        <!--Muro de Navegación-->    
-        <nav>
-            <ul>
-                <a href="">Publicar</a>        
-                <a href="">Muro de Ventas</a>
-            </ul>
-        </nav>
+     <!--llamamos al documento de JavaScript que vincula nuestra APP web
+        con los servicios de Firebase-->
+    <script src="js/init.js"></script>
 
-        <!--Cabecera o Titulo del Form-->
-        <header>
-            <h1>Mi Perfil</h1>
-        </header>        
+  </head>
+  <body>
+      <h1>Muro de Aplicación</h1>
+      <form action="javascript:agrega();">
+          <input id="texto" type="text" required placeholder="Mensaje">
+          <button>Enviar</button>
+      </form>
+      <ol id="mensajes"><li><progress max="100">Cargando...</progress></li></ol>
+      
 
-        <!--Aqui se carga la imagen de Google-->
-        <figure>
-            <img id="avatar" src="" 
-            alt="Avatar">
-        </figure>
+<script>
+    /*
+    /*Variable para almacenar el nombre de usuario Autenticado en Firebase*/
+    let usuario = "";
 
-        <!--Aqui se cargará el email del Google-->
-        <p>
-            <label>
-                <fieldset>
-                <legend>Email</legend>
-                <output id="email">
-                    <progress max="100">Cargando...</progress>
-                </output>
-                </fieldset>
-            </label>
-        </p>
+    //Conexion al sistema de Autentificación de Firebase
+    //@ts-ignore
+    const auth = firebase.auth();
 
-        <!--Aqui se cargará el nombre de la cuenta de Google-->
-        <p>
-            <label>
-                <fieldset>
-                    <legend>Nombre</legend>
-                    <output id="nombre">
-                        <progress max="100">Cargando...</progress>
-                    </output>
-                </fieldset>
-            </label>
-        </p>
+    /** Tipo de autenticación de usuarios. En este caso es Google*/
+    //@ts-ignore
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-        <!--Botón de Terminar Sesión-->
-        <button 
-        type="button"
-        onclick="terminaSesión()">
-        Cerrar Sesión
-        </button>
-    </form>
+    /* Configuramos el proveedor de Google para que nos permita
+    seleccionar de una lista*/
+    provider.setCustomParameters({ prompt: "select_account"});
+    /* Recibe una función que se invoca cada que hay un cambio en la
+    autenticación y recibe el modelo con las caracteristicas del usuario*/
 
-    <script>
+    auth.onAuthStateChanged(
+    /* Recibimos las caracteristicas del usuario o null si no ha iniciado
+    sesión*/
+    async usuarioAuth => {
+        if(usuarioAuth && usuarioAuth.email){
+            //Usuario aceptado
+            usuario = usuarioAuth.email;
 
-        const auth = firebase.auth();
+            muestraMensajes();
+        }else{
+            //No ha iniciado Sesión. Pide datos para iniciar sesión.
+            await auth.signInWithRedirect(provider);
+        }
+    },
+        procesaError
+    );
 
-        const provider = new firebase.auth.GoogleAuthProvider();
+    /*Conexión a la Base de Datos*/
+    const firestore = firebase.firestore();
 
-        provider.setCustomParameters({ prompt: "select_account" });
+    /* Agrega un usuario a la base de datos*/
+    function agrega() {
+        /* "MENSAJE" es el nombre de la colección a la que se agregan los datos
+         * "USUARIO", "TEXTO" y "TIMESTAMP" son los nombres de los campos en el
+         * documento.
+         * El timestamp contiene la fecha y hora en que se agrega el registro.*/
+        firestore.collection("MENSAJE").add({
+            //Capturamos lo de la variable usuario para almacenarlo en el campo USUARIO
+            USUARIO: usuario,
+            //Capturamos lo del input texto en el campo TEXTO
+            TEXTO: texto.value.trim(),
+            //Capturamos la fecha y hora en la que se crea en el campo TIMESTAMP
+            TIMESTAMP: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }
 
-        auth.onAuthStateChanged(
+    /** Funcion que muestra los mensajes almacenados en nuestra base de datos en la
+     * coleción "MENSAJE". Se actualiza automaticamente. */
+    function muestraMensajes(){
+        /** Consulta que se actualiza de forma automatica. Consulta todos los resgitros
+         * de la colección "MENSAJE" y los ordena por el campo "TIMESTAMP" de forma
+         * descendiente. */        
+        firestore.collection("MENSAJE").orderBy("TIMESTAMP", "desc")
+        .onSnapshot(
+            /** Función que muestra los datos enviados por el servidor. Si los datos
+             * cambian en el servidor, se vuelve a invocar esta función y recibe los
+             * datos actualizados.
+             * @param {Array} querySnapshot la estructura es muy parecida a un Array, que
+             * contiene una copia de los datos en el servidor. */
+            querySnapshot => {
+                // Vacía la lista con los mensajes.
+                //@ts-ignore
+                mensajes.innerHTML = "";
+                /** Revisa uno por uno los registros de la consulta y los muestra.
+                  * El iterador "doc" es un registro de la base de datos. */
+                querySnapshot.forEach(doc => {
+                    //recupera los datos almacenados en el registro.
+                    const data = doc.data();
 
-            usuarioAuth => {
-                if(usuarioAuth && usuarioAuth.email){
-
-                    email.value = usuarioAuth.email;
-
-                    nombre.value = usuarioAuth.displayName;
-
-                    avatar.src = usuarioAuth.photoURL;
-                }else{
-
-                    auth.signInWithRedirect(provider);                    
-                }
+                    var d = data.TIMESTAMP.toDate(),
+                    dformat = [d.getDate(), d.getMonth()+1, d.getFullYear()].join('/')+''+
+                              [d.getHours(), d.getMinutes(), d.getSeconds()].join(':');
+                    /** Agrega un li con los datos del registro, que se codifican para
+                     * evitar inyección de código. */
+                    mensajes.innerHTML += /* HTML */
+                    `<li><u>${cod(data.USUARIO)}</u> ${dformat}<br>${cod(data.TEXTO)}</li>`;
+                })
             },
-            procesaError
-        );
-
-        async function terminaSesión(){
-            try{
-                await auth.signOut();
-            }catch (e) {
+            /** función que se invoca si hay un error, de esta manera nos muestra 
+             * el error. Al invocar esta función la conexión se cancela. Por lo mismo,
+             * se vuelve a conectar. */
+            e => {
                 procesaError(e);
-            }
-        }
 
-        function procesaError(e){
-            console.log(e);
-            alert(e.message);
-        }
-        </script>
-    </body>
+                //Intenta conectarse otra vez
+                muestraMensajes();
+            }
+        )
+    }
+    /* Procesa un error. Muestra el objeto en la consola y un cuadro de alerta
+    con el mensaje. 
+    @param {Error} e descripcion del error */    
+    function procesaError(e){
+        console.log(e);
+        alert(e.message);
+    }
+
+    /** Map que contiene el texto de escape de los caracteres especiales de 
+     * HTML. */
+    const codMap = Object.freeze(new Map([['&', '&amp;'], ['<', '&lt;'],
+    ['>', '&gt;'], ['"', '&quot;'], ["'", '&#039;']]));
+
+    /** Codifica un texto para que escape los caracteres especiales y no se pueda 
+     * interpretar como HTML. Esta técnica evita la inyeción de código. */
+    function cod(texto) {
+        return (texto || "").replace(/[&<>"']/g, letra => codMap.get(letra));
+    }
+</script>
+  </body>
 </html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+     <!--Nucleo de Firebase JS SDK -->
+     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    
+     <!--Servicio de Autenticación-->
+      <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+ 
+      <!--Servicio de Firestore "Base de Datos"-->
+      <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+ 
+      <!--llamamos al documento de JavaScript que vincula nuestra APP web
+         con los servicios de Firebase-->
+     <script src="js/init.js"></script> 
+
+    <link rel="stylesheet" href="CSS/estilos.css">
+
+</head>
+<body>
+    <nav>
+            <ul style="float:right;">
+                <a href="index.html">Mi Perfil</a>        
+                <a href="">Muro de Ventas</a>
+            </ul>
+        </nav>
+        <header>
+            <h1>Llenar Formulario</h1>
+        </header>
+        <form action="javascript:agrega();">
+            <p><em>El borde azul indica Obligatorio</em></p>            
+            <p>
+                <label >
+                    Titulo de la Publicación<br>
+                    <input id="titulo" 
+                           type="text" required
+                           pattern=".{10,30}"
+                           title="De 10 a 30 caracteres"
+                           maxlength="30" 
+                           size="70"
+                           placeholder="10 a 30 caracteres">
+                </label>
+            </p>
+            <p>
+                <label >
+                    Descripcion<br>
+                    <input id="descripcion" 
+                           type="text" required
+                           pattern=".{1,50}"
+                           title="No puede Dejar este campo vacio y max 50"
+                           maxlength="50" 
+                           size="70"
+                           placeholder="Hasta 50 caracteres">
+                </label>
+            </p>
+            <p>
+                <label >
+                    URL<br>
+                    <input id="URLlink" 
+                           type="text"                           
+                           maxlength="50" 
+                           size="70"
+                           placeholder="10 a 17 numeros">
+                </label>
+            </p>
+            <p>
+                <label >
+                    Numero de WhatsApp<br>
+                    <input id="whatsApp" 
+                           type="text"
+                           pattern=".{10,17}"
+                           title="De 10 a 17 numeros"
+                           maxlength="17" 
+                           size="20"
+                           placeholder="10 a 17 numeros">
+                </label>
+            </p>
+            <button style="float: right;">
+                Comprobar
+            </button>
+        </form>
+    <script>
+        let usuario = "";
+
+        const auth = firebase.auth();
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        provider.setCustomParameters({ prompt: "select_account"});
+
+        auth.onAuthStateChanged(
+        /* Recibimos las caracteristicas del usuario o null si no ha iniciado
+        sesión*/
+        async usuarioAuth => {
+            if(usuarioAuth && usuarioAuth.email){
+
+                usuario = usuarioAuth.displayName;
+                
+            }else{
+                //No ha iniciado Sesión. Pide datos para iniciar sesión.
+                await auth.signInWithRedirect(provider);
+            }
+        },
+            procesaError
+        );
+
+        const firestore = firebase.firestore();
+
+        function agrega() {
+        /* "PUBLICACIONES" es el nombre de la colección a la que se agregan los datos
+         * "USUARIO", "TITULO", "DESCRIPCION" y "TIMESTAMP" son los nombres de los campos en el
+         * documento.
+         * El timestamp contiene la fecha y hora en que se agrega el registro.*/
+        firestore.collection("PUBLICACIONES").add({
+            //Capturamos lo de la variable usuario para almacenarlo en el campo USUARIO
+            USUARIO: usuario,
+            //Capturamos lo del input texto en el campo TEXTO
+            TITULO: titulo.value.trim(),
+
+            DESCRIPCION: descripcion.value.trim(),
+
+            LINK: URLlink.value.trim(),
+
+            WHATS: whatsApp.value.trim(),
+
+            //Capturamos la fecha y hora en la que se crea en el campo TIMESTAMP
+            TIMESTAMP: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }
+    function procesaError(e){
+        console.log(e);
+        alert(e.message);
+    }
+    </script>
+</body>
+</html>

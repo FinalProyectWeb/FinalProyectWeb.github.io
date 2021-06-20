@@ -35,19 +35,7 @@
         <form action="javascript:agrega();">
             <p><em>El borde azul indica Obligatorio</em></p>            
             <p>
-                <label >
-                    Titulo de la Publicación<br>
-                    <input id="titulo" 
-                           type="text" required
-                           pattern=".{10,30}"
-                           title="De 10 a 30 caracteres"
-                           maxlength="30" 
-                           size="70"
-                           placeholder="10 a 30 caracteres">
-                </label>
-            </p>
-            <p>
-                <label >
+                <label>
                     Descripcion<br>
                     <input id="descripcion" 
                            type="text" required
@@ -120,7 +108,7 @@
             //Capturamos lo de la variable usuario para almacenarlo en el campo USUARIO
             USUARIO: usuario,
             //Capturamos lo del input texto en el campo TEXTO
-            TITULO: titulo.value.trim(),
+            //TITULO: titulo.value.trim(),
 
             DESCRIPCION: descripcion.value.trim(),
 

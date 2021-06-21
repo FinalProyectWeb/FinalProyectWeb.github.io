@@ -1,0 +1,34 @@
+html{
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    font-size: large;
+    text-align: center;
+}
+
+*:required{
+    border: thin solid blue;
+    border-style:ridge;
+    border-radius: 2cm;
+    border-width: .07cm;
+}
+
+body{
+    display: inline-block;/*Todo en una caja centrada*/
+    text-align: left;/*Todo lo que este en la caja alineado a la izquierda*/
+}
+em{
+    color: blue;
+    font-size: larger;
+}
+
+label{
+    font-size: larger;
+}
+
+input{
+    font-size: large;
+}
+button{
+    font-size:x-large;
+    padding-left: 1cm; 
+    padding-right: 1cm;
+}
